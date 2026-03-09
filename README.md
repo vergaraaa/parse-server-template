@@ -16,47 +16,7 @@ A production-ready, Dockerized Parse Server template configured for Back4App dep
 
 ## 🏎 Quick Start
 
-> ⚠️ **Do not clone this repo directly.** Use the CLI below to scaffold a new project — it handles all configuration automatically.
-
-### 1. Scaffold a New Project
-
-```bash
-npx @vergaraaa/create-parse-app my-new-app
-```
-
-The CLI will prompt you for:
-
-- **Back4App app name** — exact name from your Back4App dashboard
-- **Back4App App ID** — found in your app's Security & Keys settings
-- **Back4App account email** — used in the deployment script
-
-It will then automatically:
-
-- Clone this template into a new `./my-new-app` folder
-- Rename all Docker services and containers with your app prefix
-- Create a `.env` from `.env.example` and configure `APP_NAME` and `DATABASE_URI`
-- Patch `package.json` with your app name
-- Fill in all placeholders in `deploy.sh`
-- Initialise a fresh git repo with an initial commit
-
-### 2. Set Remaining Environment Variables
-
-Open the generated `.env` file and fill in your Back4App keys:
-
-```bash
-cd my-new-app
-```
-
-```env
-APP_ID=your_app_id
-MASTER_KEY=your_master_key
-REST_API_KEY=your_rest_api_key
-MAINTENANCE_KEY=your_maintenance_key
-```
-
-**⚠️ Critical for mobile development:** Set `SERVER_URL` to your computer's local Wi-Fi IP (e.g., `http://192.168.1.50:1337/parse`), **NOT** `localhost`. Physical devices and emulators resolve files and images from this URL — if it points to `localhost` they will look inside the device itself.
-
-### 3. Install & Start
+### Install & Start
 
 ```bash
 pnpm install
