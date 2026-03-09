@@ -4,8 +4,8 @@ set -e
 # Remove old dist
 rm -rf dist/
 
-# Build TypeScript
-npm run build
+# Build TypeScript (Using PNPM)
+pnpm run build
 
 # Ensure public folder exists
 mkdir -p ./dist/public
@@ -18,10 +18,10 @@ cat > ./dist/.parse.local <<EOL
 {
   "applications": {
     "_default": {
-      "link": "test"
+      "link": "<YOUR_APP_NAME>"
     },
-    "test": {
-      "applicationId": "DAZYcsIPJcoeQSHl0YBSQfuBCuUliUWK6NuplXcQ"
+    "<YOUR_APP_NAME>": {
+      "applicationId": "<YOUR_APP_ID>"
     }
   }
 }
@@ -34,7 +34,7 @@ cat > ./dist/.parse.project <<EOL
   "parse": {
     "jssdk": "2.2.25"
   },
-  "email": "edgar.vergara@cyberneid.com"
+  "email": "<YOUR_EMAIL>"
 }
 EOL
 
