@@ -88,67 +88,7 @@ CMD ["pnpm", "run", "dev"]
 
 ### ⚠️ Preventing Container Conflicts
 
-Because we use this same template across multiple projects, you **must rename your Docker services and containers** in `docker-compose.yml` to be specific to your app. Otherwise, Docker will overwrite your containers.
-
-_Note: Changing the exposed ports (1337 and 27017) is usually not necessary unless you need to run two different projects at the exact same time._
-
-#### ❌ The Default Template (DO NOT USE AS-IS)
-
-Out of the box, the template looks like this. If everyone leaves it like this, projects will collide and override each other's containers.
-
-**Default `docker-compose.yml`:**
-
-```yaml
-services:
-  mongodb:
-    image: mongo:8
-    container_name: parse-mongodb
-    ports:
-      - "27017:27017"
-    # ...
-  parse-app:
-    # ...
-    container_name: parse-express-app
-    ports:
-      - "1337:1337"
-    depends_on:
-      - mongodb
-```
-
-#### ✅ The App-Specific Setup (WHAT YOU SHOULD DO)
-
-Rename the services and containers to include a prefix for your specific project (e.g., `myapp`).
-
-**1. Updated `docker-compose.yml`:**
-
-```yaml
-services:
-  myapp-mongodb: # Service name changed
-    image: mongo:8
-    container_name: myapp-parse-mongodb # Container name changed
-    ports:
-      - "27017:27017" # Only change the host port if running multiple apps simultaneously (e.g., "27018:27017")
-    volumes:
-      - ./mongo-data:/data/db
-    command: mongod --quiet --logpath /dev/null
-
-  myapp-parse-app: # Service name changed
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: myapp-parse-express-app # Container name changed
-    ports:
-      - "1337:1337" # Only change the host port if needed (e.g., "1338:1337")
-    env_file:
-      - ./.env
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    depends_on:
-      - myapp-mongodb # MUST match the mongodb service name above!
-```
-
-**2. Updated `.env` file:**
+**1. Updated `.env` file:**
 Make sure your `DATABASE_URI` connection string targets the exact service name you just created for MongoDB!
 
 ```env
@@ -171,7 +111,7 @@ DATABASE_URI=mongodb://myapp-mongodb:27017/parsedb
 **💡 Why the Local IP and not Localhost?**
 If you are developing a mobile app (like Flutter or React Native), you **must** set the `SERVER_URL` to your computer's local network IP (e.g., `192.168.1.50`). If you set it to `localhost`, the Parse Server will save file and image URLs as `http://localhost...`. When your physical phone tries to load that image, it will look for `localhost` inside the phone itself instead of your computer, and all your images will be broken!
 
-**3. Dynamic Console Logging in `index.ts`:**
+**2. Dynamic Console Logging in `index.ts`:**
 Even though the app needs the IP address for the `SERVER_URL`, **you must access the Parse Dashboard in your computer's browser using `localhost`**.
 
 If you try to open the dashboard via the `192.168.x.x` IP over standard HTTP, modern web browsers will block the `crypto.randomUUID()` function for security reasons, causing the dashboard to instantly crash with an error.
@@ -189,7 +129,7 @@ app.listen(port, () => {
 });
 ```
 
-**4. Start the server:**
+**3. Start the server:**
 For the very first time, build and start the containers by running:
 
 ```bash
@@ -198,7 +138,7 @@ docker compose up --build
 
 This spins up the database and backend. Any changes you make to TypeScript files will automatically restart the server. **After building the first time, only `docker compose up` is necessary to start your environment.**
 
-**5. Stop the server:**
+**4. Stop the server:**
 To gracefully stop the containers, use:
 
 ```bash
