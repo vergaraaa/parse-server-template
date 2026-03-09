@@ -2,7 +2,7 @@
 
 A production-ready, Dockerized Parse Server template configured for Back4App deployments. This template enforces strict Infrastructure-as-Code (IaC) principles, strong TypeScript typing, and a domain-driven folder structure to keep cloud code scalable.
 
-📖 **Note:** This README is a Quick Start guide. For deep-dive explanations on ACLs, validations, and architecture, please read the **wiki** file.
+📖 **Note:** This README is a Quick Start guide. For deep-dive explanations on ACLs, validations, and architecture, please read the [Parse Server Development Standards Workflow](https://dev.azure.com/cyberneid/Components/_wiki/wikis/Components.wiki/408/Parse-Server-Development-Standards-Workflow).
 
 ---
 
@@ -16,63 +16,73 @@ A production-ready, Dockerized Parse Server template configured for Back4App dep
 
 ## 🏎 Quick Start
 
-### 1. Configure Project Details
+> ⚠️ **Do not clone this repo directly.** Use the CLI below to scaffold a new project — it handles all configuration automatically.
 
-Before installing packages, open your `package.json` file and change the `"name"` property from the template default to your specific app's name and add a description if necessary.
-
-### 2. Prevent Docker Conflicts (Crucial First Step)
-
-Because this template is shared across multiple projects, you **must** rename your Docker services to avoid local network collisions.
-
-1. Open `docker-compose.yml`.
-2. Rename `mongodb` to `[yourapp]-mongodb` (e.g., `myapp-mongodb`).
-3. Rename `parse-app` to `[yourapp]-parse-app`.
-4. Update the `depends_on` block to match the new MongoDB service name.
-
-### 3. Set Up Environment Variables
-
-Copy the provided `.env.example` file to create your local `.env` file:
+### 1. Scaffold a New Project
 
 ```bash
-cp .env.example .env
+npx @vergaraaa/create-parse-app my-new-app
 ```
 
-Open the newly created `.env` file and fill in your specific Back4App keys.
+The CLI will prompt you for:
 
-**⚠️ CRITICAL CONFIGURATIONS:**
+- **Back4App app name** — exact name from your Back4App dashboard
+- **Back4App App ID** — found in your app's Security & Keys settings
+- **Back4App account email** — used in the deployment script
 
-- **Mobile Dev:** Set `SERVER_URL` to your computer's local Wi-Fi IP (e.g., `http://192.168.1.50:1337/parse`), **NOT** `localhost`. This is required for physical devices/emulators to resolve files and images correctly.
-- **Database:** Ensure your `DATABASE_URI` matches the exact MongoDB service name you configured in Step 2 (e.g., `mongodb://[yourapp]-mongodb:27017/parsedb`).
+It will then automatically:
 
-### 4. Install & Start
+- Clone this template into a new `./my-new-app` folder
+- Rename all Docker services and containers with your app prefix
+- Create a `.env` from `.env.example` and configure `APP_NAME` and `DATABASE_URI`
+- Patch `package.json` with your app name
+- Fill in all placeholders in `deploy.sh`
+- Initialise a fresh git repo with an initial commit
 
-Run the following commands to install dependencies using the shared global store and spin up the Docker container:
+### 2. Set Remaining Environment Variables
+
+Open the generated `.env` file and fill in your Back4App keys:
+
+```bash
+cd my-new-app
+```
+
+```env
+APP_ID=your_app_id
+MASTER_KEY=your_master_key
+REST_API_KEY=your_rest_api_key
+MAINTENANCE_KEY=your_maintenance_key
+```
+
+**⚠️ Critical for mobile development:** Set `SERVER_URL` to your computer's local Wi-Fi IP (e.g., `http://192.168.1.50:1337/parse`), **NOT** `localhost`. Physical devices and emulators resolve files and images from this URL — if it points to `localhost` they will look inside the device itself.
+
+### 3. Install & Start
 
 ```bash
 pnpm install
 docker compose up --build
 ```
 
-> **Note:** If you add new dependencies via `pnpm add <package>` later, you must run `docker compose up --build` again to update the container's cache.
+> **Note:** If you add new dependencies via `pnpm add <package>` later, run `docker compose up --build` again to update the container cache.
 
-Once running, access the Parse Dashboard securely at: `http://localhost:1337/dashboard`
+Once running, access the Parse Dashboard at: `http://localhost:1337/dashboard`
 
 ---
 
 ## 🗂 Project Structure
 
-We strictly organize our code by **Domain (Parse Class)**.
+We strictly organize code by **Domain (Parse Class)**.
 
 ```text
 .
-├── deploy.sh                    # Customizable Back4App deployment script
-├── docker-compose.yml           # Local infrastructure
+├── deploy.sh                    # Back4App deployment script (pre-configured by CLI)
+├── docker-compose.yml           # Local infrastructure (pre-configured by CLI)
 ├── package.json
 ├── src/
 │   ├── index.ts                 # Express & Parse Server initialization
 │   ├── config.ts                # Parse Server configuration object
 │   └── cloud/                   # ☁️ ALL PARSE LOGIC LIVES HERE
-│       ├── main.ts              # Entry point: Imports all domain index files
+│       ├── main.ts              # Entry point: imports all domain index files
 │       │
 │       ├── schemas/             # 1. INFRASTRUCTURE AS CODE
 │       │   ├── index.ts         # Barrel file + schema definitions array
@@ -100,7 +110,7 @@ We strictly organize our code by **Domain (Parse Class)**.
 ## 📜 The Golden Rules of Development
 
 1. **Zero Dashboard Modifications:** NEVER create classes, add columns, or modify CLPs from the Back4App dashboard. All database architecture must be defined in `src/cloud/schemas/`.
-2. **One Folder per Class:** All Cloud Triggers (`beforeSave`, `afterDelete`) and Cloud Functions related to a specific class (e.g., `Profile`) must live inside a folder named exactly after that class (e.g., `src/cloud/profile/`).
+2. **One Folder per Class:** All Cloud Triggers (`beforeSave`, `afterDelete`) and Cloud Functions related to a specific class must live inside a folder named exactly after that class (e.g., `src/cloud/profile/`).
 3. **One Function per File:** Never group multiple Cloud Functions into a single file. Create a dedicated file for each function (e.g., `updateAvatar.ts`) and export it via the folder's `index.ts` barrel.
 4. **Enforce Server-Side ACLs:** Frontend clients should not dictate security. Always set Row-Level Security (`ACL`) using `beforeSave` triggers inside your domain folders.
 
@@ -108,13 +118,11 @@ We strictly organize our code by **Domain (Parse Class)**.
 
 ## 🚀 Deployment to Back4App
 
-Before deploying for the first time, open `deploy.sh` and replace the placeholder values (`<YOUR_APP_NAME>`, `<YOUR_APP_ID>`) with your specific Back4App credentials.
-
 **1. Clean up demo code:**
-Delete `test.schema.ts`, `test.object.ts`, and the `src/cloud/test/` directory.
+Delete `test.schema.ts`, `test.object.ts`, and the `src/cloud/test/` directory. Remove their exports from the respective barrel files.
 
 **2. Update Version & Changelog:**
-Open `package.json` and bump the `"version"` number. Document your additions, fixes, and schema updates in a `CHANGELOG.md` file to keep a clear history of releases.
+Bump the `"version"` in `package.json` and document your changes in `CHANGELOG.md`.
 
 **3. Run the deployment script:**
 
@@ -123,7 +131,10 @@ Open `package.json` and bump the `"version"` number. Document your additions, fi
 ```
 
 **4. Run the Database Migration:**
-Once deployed, go to your **Back4App API Console** in the browser, check the "Master Key" box, and send a `POST` request to:  
-`/functions/dbMigrate`
+Once deployed, go to the **Back4App API Console** in your browser, check the "Master Key" box, and send a `POST` request to:
 
-This will automatically create and sync all your classes, columns, and CLPs on the production database!
+```
+/functions/dbMigrate
+```
+
+This automatically creates and syncs all your classes, columns, and CLPs on the production database.
