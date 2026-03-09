@@ -1,0 +1,24 @@
+services:
+  mongodb:
+    image: mongo:8
+    container_name: parse-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+    command: mongod --quiet --logpath /dev/null
+
+  parse-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parse-express-app
+    ports:
+      - "1337:1337"
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongodb

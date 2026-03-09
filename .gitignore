@@ -1,0 +1,5 @@
+dist
+logs
+mongo-data
+node_modules
+.env

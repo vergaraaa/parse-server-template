@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "es2020",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": ["ES2020"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "public",
+    "spec",
+    "logs",
+    "dist",
+    "release.config.js",
+    "eslint.config.mjs"
+  ]
+}

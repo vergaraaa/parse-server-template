@@ -1,0 +1,28 @@
+{
+  "name": "parse-server-local",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec ts-node --files src/index.ts",
+    "build": "tsc",
+    "b4a:deploy": "bash ./deploy.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "parse": "^8.5.0",
+    "parse-dashboard": "^9.0.0",
+    "parse-server": "^7.5.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.25",
+    "@types/node": "^25.3.5",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
